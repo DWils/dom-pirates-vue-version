@@ -3,24 +3,28 @@
     <div id="container">
       <!-- Zone de jeu : la mer -->
       <div id="map">
-        <ItemCreator :level="this.level"/>
+        <ItemCreator :level="this.level" />
       </div>
 
       <!-- Zone de contrôle et d'output -->
       <div id="interface">
         <div id="controls">
-          <h2 id="niveau">Niveau 1</h2>
-          <h3 id="instruction">Sélectionner un élément avec son id</h3>
+          <h2 id="niveau">Niveau {{ this.level }}</h2>
+          <h3 id="instruction">{{ this.interface[this.level - 1].instructionSubtitle }}</h3>
           <p id="aide">
-            Utilisez <span>document.getElementById('id_de_l'élément')</span> pour trouver le bateau !
+            Utilisez
+            <span class="dom-code">
+              {{ this.interface[this.level - 1].helpParagraphe[0] }}
+            </span>
+            {{ this.interface[this.level - 1].helpParagraphe[1] }}
           </p>
           <label for="commande">
             const bateau =
-            <input type="text" id="commande" placeholder="Entrez votre commande JS ici">
+            <input type="text" id="commande" v-model="commande" placeholder="Entrez votre commande JS ici">
           </label>
-          <button id="valider">Valider</button>
+          <button id="valider" @click="checkResponse()">Valider</button>
         </div>
-        <div id="output"></div>
+        <div id="output">{{ this.output }}</div>
       </div>
     </div>
   </div>
@@ -35,9 +39,40 @@ export default {
     ItemCreator
   },
 
-  data(){
+  data() {
     return {
       level: 1,
+      output: "",
+      interface: [
+        {
+          id: 1,
+          instructionSubtitle: 'Sélectionner un élément avec son id',
+          helpParagraphe: ["document.getElementById('id_de_l\'élément')", "pour trouver le bateau !"]
+        },
+        {
+          id: 2,
+          instructionSubtitle: 'Sélectionner plusieurs éléments avec leur classe',
+          helpParagraphe: ["document.getElementsByClassName('nom_de_la_classe')", "pour sélectionner tous les bateaux avec leur classe !"]
+        },
+        {
+          id: 3,
+          instructionSubtitle: 'Sélectionner le premier bateau avec querySelector',
+          helpParagraphe: ["document.querySelector('.nom_de_la_classe')", "pour trouver le premier bateau !"]
+        },
+      ],
+    }
+  },
+  methods: {
+    checkResponse() {
+
+      if (this.commande === "document.getElementById('bateau1')") {
+        this.output = this.commande + " est la bonne réponse";
+        this.level++;
+        this.commande = "";
+      } else {
+        this.output = "perdu";
+      }
+
     }
   }
 }
@@ -130,11 +165,12 @@ export default {
   border: 1px solid #ccc;
 }
 
-#aide span{
+.dom-code {
   font-weight: bold;
 }
 
-#aide span:hover {
-    background-color: rgba(0, 107, 126, 0.2);
-  }
+.dom-code:hover {
+  background-color: rgba(0, 100, 126, 0.6);
+  color: white;
+}
 </style>

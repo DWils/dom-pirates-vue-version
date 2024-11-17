@@ -44,6 +44,23 @@ export default {
             }
           ]
         },
+        {
+          level: 3,
+          ships: [
+            {
+              id: 'bateau1',
+              class: 'bateaux'
+            },
+            {
+              id: 'bateau2',
+              class: 'bateaux'
+            },
+            {
+              id: 'bateau3',
+              class: 'bateaux'
+            }
+          ]
+        },
 
       ]
 
@@ -83,9 +100,9 @@ export default {
 
 /* Effet au survol */
 .bateau:hover,
-.bateaux:hover {
+.bateaux:hover{
   transform: scale(1.1);
-  border: 8px solid orange;
+  box-shadow: 0px 0px 10px 10px #09fa00;
 }
 
 /* Étiquette pour les bateaux */
