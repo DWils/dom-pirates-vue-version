@@ -1,13 +1,8 @@
 <template>
-  <div
-    v-for="(ship, index) in this.levels[this.level - 1].ships"
-    :key="index"
-    :id="ship.id"
-    :class="ship.class"
-  >
-    <img :src="this.pirateShipImage" alt="Pirate Ship" class="ship" />
+  <div v-for="(item, index) in this.levels[this.level - 1].items" :key="index" :id="item.id" :class="item.class">
+    <img :src="item.image" alt="item image" class="item" />
     <div class="tooltip">
-      id="{{ ship.id }}" class="{{ ship.class }}"
+      id="{{ item.id }}" class="{{ item.class }}"
     </div>
   </div>
 </template>
@@ -23,33 +18,41 @@ export default {
       levels: [
         {
           level: 1,
-          ships: [
-            { id: "bateau1", class: "bateaux" },
+          items: [
+            { id: "bateau1", class: "bateaux", image: this.getImageUrl('../assets/images/pirate-ship.png') },
           ],
         },
         {
           level: 2,
-          ships: [
-            { id: "bateau1", class: "bateaux" },
-            { id: "bateau2", class: "bateaux" },
-            { id: "bateau3", class: "bateaux" },
+          items: [
+            { id: "bateau1", class: "bateaux", image: this.getImageUrl('../assets/images/pirate-ship.png') },
+            { id: "bateau2", class: "bateaux", image: this.getImageUrl('../assets/images/pirate-ship.png') },
+            { id: "bateau3", class: "bateaux", image: this.getImageUrl('../assets/images/pirate-ship.png') },
           ],
         },
         {
           level: 3,
-          ships: [
-            { id: "bateau1", class: "bateaux" },
-            { id: "bateau2", class: "bateaux" },
-            { id: "bateau3", class: "bateaux" },
+          items: [
+            { id: "bateau1", class: "bateaux", image: this.getImageUrl('../assets/images/pirate-ship.png') },
+            { id: "tresor", class: "tresors", image: this.getImageUrl('../assets/images/tresor-pirate.png') },
+            { id: "bateau2", class: "bateaux", image: this.getImageUrl('../assets/images/pirate-ship.png') },
+          ],
+        },
+        {
+          level: 4,
+          items: [
+            { id: "bateau1", class: "bateaux", image: this.getImageUrl('@/assets/images/pirate-ship.png') },
+            { id: "bateau2", class: "bateaux", image: this.getImageUrl('@/assets/images/pirate-ship.png') },
+            { id: "bateau3", class: "bateaux", image: this.getImageUrl('@/assets/images/pirate-ship.png') },
           ],
         },
       ],
     };
   },
 
-  computed: {
-    pirateShipImage() {
-      return new URL('@/assets/images/pirate-ship.png', import.meta.url).href;
+  methods: {
+    getImageUrl(imagePath) {
+      return new URL(imagePath, import.meta.url).href;
     },
   },
 };
@@ -74,14 +77,14 @@ export default {
 }
 
 /* Image de bateau pirate */
-.ship {
+.item {
   width: 100%;
 }
 
 /* Étiquette pour les bateaux */
 .tooltip {
   position: absolute;
-  background-color: rgba(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.7);
   color: white;
   padding: 5px 10px;
   border-radius: 5px;
@@ -107,5 +110,4 @@ export default {
 .bateaux:not(:hover) img {
   filter: brightness(0.7);
 }
-
 </style>

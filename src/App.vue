@@ -1,111 +1,133 @@
 <template>
   <div id="game-body">
     <div id="container">
-      <!-- Zone de jeu : la mer -->
+      <!-- Zone de jeu -->
       <div id="map">
-        <ItemCreator :level="this.level" />
+        <ItemCreator :level="level" />
       </div>
 
-      <!-- Zone de contrôle et d'output -->
+      <!-- Interface utilisateur -->
       <div id="interface">
         <div id="controls">
-          <h2 id="niveau">Niveau {{ this.level }}</h2>
-          <h3 id="instruction">{{ this.interface[this.level - 1].instructionSubtitle }}</h3>
+          <h2 id="niveau">Niveau {{ level }}</h2>
+          <h3 id="instruction">{{ currentLevel().subtitle }}</h3>
           <p id="aide">
-            Utilisez
+            Créez une variable <span>"{{ currentLevel().variable }}"</span> qui a pour valeur :
             <span class="dom-code" @click="addCodeToCommandInput">
-              {{ this.interface[this.level - 1].helpParagraphe[0] }}
+              {{ currentLevel().help.code }}
             </span>
-            {{ this.interface[this.level - 1].helpParagraphe[1] }}
+            {{ currentLevel().help.description }}
           </p>
           <label for="commande">
-            const bateau =
-            <input type="text" id="commande" v-model="commande" placeholder="Entrez votre commande JS ici">
+            <div>
+              <textarea id="commande" v-model="commande" placeholder="Entrez votre commande JS ici"></textarea>
+            </div>
           </label>
-          <button id="valider" @click="checkResponse()">Valider</button>
+          <button id="valider" @click="checkResponse">Valider</button>
         </div>
         <div id="output">
-          <h2> {{ this.output }} </h2>
-          <p v-html="this.lesson"></p>
-          
+          <h2 v-html="output" id="output-title"></h2>
+          <p v-html="lesson"></p>
           <button v-if="showNextButton" @click="nextLevel">Niveau Suivant</button>
         </div>
-      
-       
-
       </div>
     </div>
   </div>
 </template>
 
+
+
+
 <script>
 import ItemCreator from './components/ItemCreator.vue';
-
 
 export default {
   name: 'App',
   components: {
     ItemCreator,
   },
-
   data() {
     return {
       level: 1,
       output: "",
       lesson: "",
       showNextButton: false,
-      commande: null,
+      commande: "", // Texte saisi par l'utilisateur
       interface: [
         {
           id: 1,
           instructionSubtitle: 'Sélectionner un élément avec son id',
-          helpParagraphe: ["document.getElementById('id_de_l\'élément')", "pour trouver le bateau !"],
-          goodAnswers: ["document.getElementById('bateau1')","document.getElementById('bateau1');","document.getElementById(\"bateau1\")","document.getElementById(\"bateau1\");"],
+          help: {
+            code: "document.getElementById('id_de_l\'élément')",
+            description: "pour sélectionner le bateau !",
+          },
+          variable: "bateau",
+
+          answerPattern: /^(const|let|var)\s+[a-zA-Z_$][a-zA-Z_$0-9]*\s*=\s*document\.getElementById\(["'][a-zA-Z0-9_-]+["']\);?$/
+          ,
           lesson: "La méthode getElementById() de l'interface Document renvoie un objet Element représentant l'élément dont la propriété id correspond à la chaîne de caractères spécifiée. Étant donné que les ID d'élément doivent être uniques, s'ils sont spécifiés, ils constituent un moyen utile d'accéder rapidement à un élément spécifique. pour plus d'information : <a href='https://developer.mozilla.org/fr/docs/Web/API/Document/getElementById'>https://developer.mozilla.org/fr/docs/Web/API/Document/getElementById</a>"
         },
         {
           id: 2,
           instructionSubtitle: 'Sélectionner plusieurs éléments avec leur classe',
-          helpParagraphe: ["document.getElementsByClassName('nom_de_la_classe')", "pour sélectionner tous les bateaux avec la même classe !"],
-          goodAnswer: "document.getElementsByClassName('bateaux')"
+          help: {
+            code: "document.getElementsByClassName('nom_de_la_classe')",
+            description: "pour sélectionner tous les bateaux avec la même classe !",
+          },
+          variable: "bateaux",
+          answerPattern: /^(const|let|var)\s+[a-zA-Z_$][a-zA-Z_$0-9]*\s*=\s*document\.getElementsByClassName\(["']bateaux["']\);?$/,
+          lesson: "Renvoie un objet de type tableau de tous les éléments enfants qui ont tous les noms de classe donnés. Lorsqu'il est appelé sur l'objet document, le document complet est recherché, y compris le nœud racine. Vous pouvez également appeler getElementsByClassName () sur n'importe quel élément; il retournera uniquement les éléments qui sont les descendants de l'élément racine spécifié avec les noms de classes donnés. Pour plus d'information : <a href='https://developer.mozilla.org/fr/docs/Web/API/Document/getElementsByClassName'>https://developer.mozilla.org/fr/docs/Web/API/Document/getElementsByClassName</a>"
         },
         {
           id: 3,
           instructionSubtitle: 'Sélectionner le premier bateau avec querySelector',
-          helpParagraphe: ["document.querySelector('.nom_de_la_classe')", "pour trouver le premier bateau d'une classe !"],
-          goodAnswer: "document.querySelector('.bateau')"
+          help: {
+            code: "document.querySelector('.nom_de_la_classe')",
+            description: "pour sélectionner uniquement le premier bateau d'une classe !"
+          },
+          variable: "bateau1",
+          answerPattern: /^(const|let|var)\s+[a-zA-Z_$][a-zA-Z_$0-9]*\s*=\s*document\.querySelector\(["']\.bateaux["']\);?$/,
+          lesson: "La méthode querySelector() de l'interface Document retourne le premier Element dans le document correspondant au sélecteur - ou groupe de sélecteurs - spécifié(s), ou null si aucune correspondance n'est trouvée. Pour plus d'information : <a href='https://developer.mozilla.org/fr/docs/Web/API/Document/querySelector'>https://developer.mozilla.org/fr/docs/Web/API/Document/querySelector</a>"
         },
       ],
-    }
+    };
   },
   methods: {
+    currentLevel() {
+      return this.interface[this.level - 1];
+    },
     checkResponse() {
+      const current = this.currentLevel();
+      const userCommand = this.commande.trim();
 
-
-      if (this.interface[this.level - 1].goodAnswers.find(answers => answers === this.commande)) {
-        this.output = this.commande + " est la bonne réponse ";
-        this.lesson = this.interface[this.level - 1].lesson
+      if (current.answerPattern.test(userCommand)) {
+        this.output = `${userCommand} <br/> est la bonne réponse.`
+        this.lesson = current.lesson;
         this.showNextButton = true;
       } else {
-        this.output = "vous avez commis une erreur";
+        this.output = "Vous avez commis une erreur.";
       }
-
     },
     nextLevel() {
       if (this.level < this.interface.length) {
         this.level++;
-        this.output = ""; // Réinitialiser l'output
-        this.lesson = "";
-        this.commande = ""; // Réinitialiser la commande
-        this.showNextButton = false; // Cacher le bouton pour le nouveau niveau
+        this.resetLevelState();
       }
     },
+    resetLevelState() {
+      this.output = ""; // Réinitialiser l'output
+      this.lesson = "";
+      this.commande = ""; // Réinitialiser la commande
+      this.showNextButton = false; // Cacher le bouton pour le nouveau niveau
+    },
     addCodeToCommandInput() {
-      this.commande = this.interface[this.level - 1].helpParagraphe[0];
+      this.commande = "const " + this.currentLevel().variable + " = " + this.currentLevel().help.code;
     },
   },
-}
+};
 </script>
+
+
 
 <style scoped>
 /* Style général */
@@ -125,8 +147,8 @@ export default {
 /* Conteneur principal */
 #container {
   display: flex;
-  width: 90%;
-  height: 70%;
+  width: 95%;
+  height: 80%;
   border: 2px solid #333;
   border-radius: 10px;
   overflow: hidden;
@@ -159,9 +181,10 @@ export default {
   margin-bottom: 20px;
 }
 
-#controls label {
+#controls textarea {
   display: block;
   margin: 10px 0;
+  width: 100%;
   font-size: 16px;
 }
 
@@ -169,6 +192,7 @@ export default {
   padding: 5px;
   width: 65%;
   font-size: 16px;
+  resize: none;
 }
 
 #valider {
@@ -194,7 +218,13 @@ export default {
   border: 1px solid #ccc;
 }
 
-.dom-code {
+#output-title {
+  font-size: 20px;
+  font-style: italic;
+  margin-bottom: 25px;
+}
+
+#aide span {
   font-weight: bold;
 }
 
@@ -202,6 +232,5 @@ export default {
   background-color: rgba(0, 100, 126, 0.6);
   color: white;
 }
-
 
 </style>
